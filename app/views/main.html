@@ -1,0 +1,26 @@
+<div class="hero-unit">
+  <ul id="watchlist">
+      <li ng-repeat="symbol in watchlist" ng-class="symbol">
+        <h1 title="{{symbol.name}}">{{symbol.symbol | uppercase}}</h1>
+        <table>
+          <tr ng-click="sparkIt()">
+            <td colspan="3">
+              <x-sparkline points="{{symbol.ticks}}" width="150" height="30"></x-sparkline>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">Last: {{symbol.last}}</td>
+            <td>{{symbol.diff}}%</td>
+            <tr>
+          <tr>
+            <td>Open: {{symbol.open}}</td>
+            <td>High: {{symbol.high}}</td>
+            <td>Low: {{symbol.low}}</td>
+          <tr>
+        </table>
+      </li>
+  </ul>
+  <div id="addItem" class="symbol" ng-click="addItem()">
+    Add
+  </div>
+</div>
