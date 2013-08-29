@@ -1,7 +1,7 @@
 Finance-App
 ===========
 
-Create a quote watchlist and keep up to date
+Create a watchlist  for your favorite stocks.
 
 
 
