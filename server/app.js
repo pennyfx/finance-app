@@ -4,14 +4,18 @@
  */
 
 var express = require('express'),
-  socket = require('./socket.js'),
-  path = require('path');
+  socketHandler = require('./socket.js'),
+  path = require('path'),
+  QuoteManager = require('./quotes.js');
 
 var app = module.exports = express(),
   server = require('http').createServer(app),
-  io = require('socket.io').listen(server);
+  io = require('socket.io').listen(server),
+  quotes = new QuoteManager();
 
 // Configuration
+console.log(quotes);
+
 
 app.configure(function(){
   app.use(express.bodyParser());
@@ -36,7 +40,9 @@ app.get('/', function(req, res){
 
 // Socket.io Communication
 
-io.sockets.on('connection', socket);
+io.sockets.on('connection', function(socket){
+  socketHandler(socket, quotes);
+});
 
 // Start server
 

@@ -1,52 +1,108 @@
 'use strict';
 
 angular.module('angularAppsApp')
-  .controller('MainCtrl', ['$scope', function ($scope, socket) {
-    $scope.watchlist = [
-      {
-        name:'Google Inc',
-        symbol: 'goog',
-        last: 803.23,
-        open: 802.20,
-        high: 804.01,
-        low: 802.10,
-        diff: 1.23,
-        ticks: [10,11,10,9,10,11,12,13,14,15,16,15,14,10,11,10,9,10,11,12,13,14,15,16,15,14]
-      },
-      {
-        name:'Apple Inc',
-        symbol: 'aapl',
-        last: 333.23,
-        open: 322.20,
-        high: 327.01,
-        low: 321.10,
-        diff: 0.85,
-        ticks: [10,11,10,9,10,11,12,13,14,15,16,15,14,10,11,10,9,10,11,12,13,14,15,16,15,14]
-      }
-    ];
+  .controller('MainCtrl', ['$scope','socket', function ($scope, socket) {
+    $scope.watchlist = [];
+    $scope.newQuote = '';
+
     $scope.addItem = function(){
+      console.log($scope.newQuote);
+      addItem($scope.newQuote);
+      socket.emit('subscribe', $scope.newQuote);
+      $scope.newQuote = '';
+    };
+
+    $scope.remove = function(){
+      removeItem(this.symbol.symbol);
+    }
+
+    socket.on('init', function (data) {
+      $scope.watchlist = getWatchList();
+      socket.emit('subscribe', $scope.watchlist.map(function(item){
+        return item.symbol;
+      }).join(','));
+    });
+
+    socket.on('quote', function(quote){
+      var entry = findEntry(quote.symbol);
+      if(entry){
+        entry.last = quote.last;
+        entry.high = quote.high;
+        entry.low = quote.low;
+        entry.diff = quote.diff;
+        entry.ticks = quote.ticks;
+        entry.deltaClass = getDeltaClass(quote.diff)
+
+      }
+    });
+
+    function getDeltaClass(diff){
+      if(diff > 0){
+        if(diff < 1.0){
+          return 'up1';
+        }else if(diff <= 2.5){
+          return 'up2';
+        }else if(diff <= 5){
+          return 'up3';
+        }else if(diff > 5){
+          return 'up4';
+        }
+      }
+      else if(diff < 0){
+        if(diff > -1.0){
+          return 'dwn1';
+        }else if(diff >= -2.5){
+          return 'dwn2';
+        }else if(diff >= -5){
+          return 'dwn3';
+        }else if(diff < -5){
+          return 'dwn4';
+        }
+      }
+      return '';
+    }
+
+    function findEntry(symbol){
+      for(var i = 0; i < $scope.watchlist.length; i++){
+        if($scope.watchlist[i].symbol == symbol){
+          return $scope.watchlist[i];
+        }
+      }
+    }
+
+    var watchListKey = 'financeapp.watchlist';
+    function getWatchList(){
+      if (localStorage[watchListKey]){
+        return JSON.parse(localStorage[watchListKey]);
+      }
+      else {
+        localStorage[watchListKey] = [];
+        return [];
+      }
+    }
+
+    function addItem(symbol){
       $scope.watchlist.push({
-        name:'Apple Inc',
-        symbol: 'aapl',
-        last: 333.23,
-        open: 322.20,
-        high: 327.01,
-        low: 321.10,
-        diff: 0.85,
-        ticks: [10,11,10,9,10,11,12,13,14,15,16,15,14]
+        name: '',
+        symbol: symbol,
+        last: 0.0,
+        open: 0.0,
+        high: 0.0,
+        low: 0.0,
+        diff: 0.0,
+        ticks: []
       });
-    };
-    $scope.sparkIt = function (){
-        var ticks = this.symbol.ticks;
+      localStorage[watchListKey] = JSON.stringify($scope.watchlist);
+    }
 
-        ticks.push( ticks[ticks.length-1] + (Math.random() * 10 >= 5 ? 1 : -1) );
-        this.symbol.ticks = ticks.slice(1);
+    function removeItem(symbol){
+      $scope.watchlist = $scope.watchlist.filter(function(item){
+        return item.symbol != symbol;
+      });
+      localStorage[watchListKey] = JSON.stringify($scope.watchlist);
+      socket.emit('unsubscribe', symbol);
+    }
 
-    };
-
-   /* socket.on('init', function (data) {
-      console.log('socket init');
-    });*/
+}]);
 
 
-  }]);

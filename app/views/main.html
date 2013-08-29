@@ -1,26 +1,31 @@
 <div class="hero-unit">
-  <ul id="watchlist">
-      <li ng-repeat="symbol in watchlist" ng-class="symbol">
-        <h1 title="{{symbol.name}}">{{symbol.symbol | uppercase}}</h1>
-        <table>
-          <tr ng-click="sparkIt()">
-            <td colspan="3">
-              <x-sparkline points="{{symbol.ticks}}" width="150" height="30"></x-sparkline>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2">Last: {{symbol.last}}</td>
-            <td>{{symbol.diff}}%</td>
-            <tr>
-          <tr>
-            <td>Open: {{symbol.open}}</td>
-            <td>High: {{symbol.high}}</td>
-            <td>Low: {{symbol.low}}</td>
-          <tr>
-        </table>
-      </li>
-  </ul>
-  <div id="addItem" class="symbol" ng-click="addItem()">
-    Add
+  <div id="watchlist">
+    <span ng-repeat="symbol in watchlist" class="symbol {{symbol.deltaClass}}" ng-dblclick="remove()">
+      <h1 title="{{symbol.name}}">{{symbol.symbol | uppercase}}</h1>
+      <table>
+
+        <tr>
+          <td colspan="3" class="current-price">{{symbol.last | number:2}}</td>
+        </tr>
+        <tr>
+          <td>{{symbol.last - symbol.open | number:2}}</td>
+          <td>{{symbol.diff | number:2}}%</td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <x-sparkline points="{{symbol.ticks}}" width="150" height="30"></x-sparkline>
+          </td>
+        </tr>
+        <tr>
+          <td>High: {{symbol.high | number:2}}</td>
+          <td>Low: {{symbol.low | number:2}}</td>
+        </tr>
+      </table>
+    </span>
+    <span class="symbol">
+      Add Symbol
+      <input ng-model="newQuote" type="text" >
+      <button ng-click="addItem()">Add</button>
+    </span>
   </div>
 </div>
